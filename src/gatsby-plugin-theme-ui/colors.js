@@ -24,11 +24,11 @@ export default {
     },
     deep: {
       text: "#fff",
-      background: "hsl(230,25%,18%)",
+      background: "#6c15a8",
       primary: "hsl(260, 100%, 80%)",
       secondary: "hsl(290, 100%, 80%)",
-      sidebar: "hsla(230, 20%, 0%, 20%)",
-      borderColor: "rgba(255, 255, 255, 0.15)"
+      sidebar: "rgba(0, 0, 0, 0.80)",
+      borderColor: "#fff"
     }
   }
 };

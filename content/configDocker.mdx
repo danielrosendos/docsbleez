@@ -1,0 +1,106 @@
+---
+title: 'Intalando e Configurando Docker'
+description: 'Como configurar o docker para o ambiente de trabalho'
+---
+
+Este guia irá ensiar como instalar o docker, docker composer e dar as permissões
+necessárias para que o docker funcione corretamente em ambientes linux.
+Este guia não irá contemplar sistema operacional Windows ou Mac, devido sua alta 
+complexidade de criação de uma imagem docker.
+
+
+## Instalando o Docker
+
+A documentação oficial da instalação do docker, pode ser conferida neste link:
+[Docker](https://docs.docker.com/install/).
+
+### Instalação Linux
+
+1.  Atualizar os pacotes `apt`:
+
+    ```console
+    $ sudo apt-get update
+    ```
+
+2.  Instale os pacotes para que o `apt` consiga ter acesso aos repositórios HTTPS:
+
+    ```console
+    $ sudo apt-get install \
+        apt-transport-https \
+        ca-certificates \
+        curl \
+        gnupg-agent \
+        software-properties-common
+    ```
+
+3.  Adicione a chave GPG oficial do Docker:
+
+    ```console
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    ```
+
+    Verifique se agora você tem a chave com a impressão digital `9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88`, 
+    pesquisando os últimos 8 caracteres da impressão digital.
+
+    ```
+    $ sudo apt-key fingerprint 0EBFCD88
+    pub   rsa4096 2017-02-22 [SCEA]
+          9DC8 5822 9FC7 DD38 854A  E2D8 8D81 803C 0EBF CD88
+    uid           [ unknown] Docker Release (CE deb) <docker@docker.com>
+    sub   rsa4096 2017-02-22 [S]
+    ```
+
+4.  Use o comando abaixo para instalar a versão mais estável do Docker
+
+    ```console
+    $ sudo add-apt-repository \
+    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) \
+    stable"
+    ```
+
+    AVISO: O docker ele não deve ser executado com comandos de superusuário,
+    para mais informações ler o link [Docker User](https://docs.docker.com/install/linux/linux-postinstall/).
+
+### Dando Permissões para o usuário do docker
+
+1. Crie o grupo do `docker`
+
+    ```console
+    $ sudo groupadd docker
+    ```
+
+2.  Adicione seu usuário ao grupo do `docker`
+
+    ```console
+    $ sudo usermod -aG docker $USER
+    ```
+
+3.  Efetue Logout e logon, para que seu grupo de usuário seja válidade pelo sistema
+
+4.  Verifique se você consegue rodar o `docker` sem comandos de `sudo`.
+
+    ```console
+    $ docker run hello-world
+    ```
+
+    Este comando baixa uma imagem de teste e a executa em um contêiner. Quando o contêiner é executado, 
+    ele imprime uma mensagem informativa e sai.
+
+    Se você executou inicialmente os comandos da CLI do Docker usando o sudo antes de adicionar seu usuário 
+    ao grupo de usuários, poderá ver o seguinte erro, que indica que o diretório `~/.docker/` 
+    foi criado com permissões incorretas devido aos comandos do sudo.
+
+    ```
+    WARNING: Error loading config file: /home/user/.docker/config.json -
+    stat /home/user/.docker/config.json: permission denied
+    ```
+
+    Para corrigir esse problema, remova o diretório `~/.docker/` (ele é recriado automaticamente, 
+    mas as configurações personalizadas são perdidas) ou altere sua propriedade e permissões usando os seguintes comandos:
+
+    ```
+    $ sudo chown "$USER":"$USER" /home/"$USER"/.docker -R
+    $ sudo chmod g+rwx "$HOME/.docker" -R
+    ```
+

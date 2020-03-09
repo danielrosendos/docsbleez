@@ -1,0 +1,514 @@
+---
+title: 'Docker Laravel 7 - Php 7.4 - Mysql 5.7'
+description: 'Sessão destinada a explicar o docker compose do laravel'
+---
+
+Essa Sessão tem como trabalho, explicar como configurar o docker compose, 
+para instalação de um container confiurado para rodar, um sistema com php 7.4 
+e mysql 5.7 já configurados. O repositório oficial está neste link, [Docker](https://github.com/sport129/dockerFileLaravel).
+
+### Glossário
+
+    - app: Nome do nosso serviço, ele é um novo que você pode atribuir a gosto,
+    ele será o nome caso precisemos linkar ele a algum outro serviço, é nome que
+    contém as informações daquele serviço.
+
+    - build: Configuração que, no momento que inicializar o docker, ele irá executar
+    comandos, para instalar serviços adicionoais para aquele serviço, no caso, irá 
+    instalar dependencias somente para o serviço app.
+
+    - ports: Defimos quais são as portas que o docker irá sincronizar entre nossa maquina
+    e o docker. A esquerda do dois pontos é a porta que o nosso sistema deve liberar e a direita
+    do ponto e virgula é a porta que o docker irá utilizar.
+
+    - context: O local que definimos, que irá ficar o nosso arquivo de script
+    
+    - dockerfile: nome do arquivo de script
+
+    - user: para definir qual o usuário que tem permissão nesse docker, para saber
+    o id do usuário do seu sistema basta executar o seguinte comando:
+
+  ```
+  $ echo $UID
+  ```
+
+    - image: Define qual imagem iremos utilizar para instalar o php.
+
+    - container_name: define um nome para o nosso container, isso serve para 
+    dividir os nossos diversos container, de diversas outras configurações.
+
+    - restart: Diz para o docker, que sempre que o sistema iniciar, este docker
+    também dever ser iniciado junto ao sistema.
+
+    - environment: Onde definimos variáveis de ambiente para o nosso serviço.
+
+    - working_dir: Definimos o local de trabalho que o docker irá atuar no seu container, diretorio dentro do container.
+
+    - volumes: Onde definimos, quais são os diretórios que meu container irá escutar, ou irá ter acesso. A esquerda
+    do ponto e virgula é definido qual o path que o docker irá utilizar, neste é o path do sistema do usuário e a
+    direita do ponto e virgula fica em qual path do docker ele irá linkar.
+
+### Criando o ambiente docker
+
+1.  Criar Uma pasta que irá concentrar seus dockers:
+
+    Essa pasta pode ser criada em qualquer local do seu computador, porém, 
+    para ficar prático, iremos criar essa pasta na raiz do sistema ou 
+    especificando no diretorio `~/`. Para criar uma pasta basta abrir seu
+    terminal e executar o seguinte comando: 
+
+    ```bash
+    $ mkdir Dockers
+    ```
+
+2.  Entrar na pasta Dockers e Criar Novo Repositorio
+
+    Por motivo de organização iremos criar uma nova pasta, para que nela fique
+    concentrado as nossas configurações do docker.
+
+    ```bash
+    $ cd Dockers && mkdir dockerLaravel && cd dockerLaravel
+    ```
+
+3.  Dentro da pasta dockerLaravel crie o arquivo docker-compose.yml
+
+    ```bash
+    $ touch docker-compose.yml
+    ```
+
+    Se você já possuir o vscode instalado em sua maquina, basta executar o seguinte
+    comando para abrir o vscode na pasta atual:
+
+    ```bash
+    $ code .
+    ```
+
+### Configurando o docker-compose.yml
+
+1. Configurando a versão e dizendo os serviços
+
+    Com o arquivo aberto devemos escrever a versão e os serviços, basta adicionar
+    no inicio do arquivo a seguinte informação:
+
+    ```
+    version: '3'
+    services:
+    ```
+
+    Estamos dizendo para o nosso docker que iremos utilizar a versao 3, e que iremos utilizar 
+    os seguintes serviços, quando ele for iniciado.
+
+2.  Seviço php
+
+    Abaixo de services devemos adicionar as seguintes informações:
+
+    ```
+      #PHP Service
+      app:
+        build:
+          context: ./image/php
+          dockerfile: Dockerfile
+        user: 1000:1000
+        image: digitalocean.com/php
+        container_name: app
+        restart: unless-stopped
+        tty: true
+        environment:
+          SERVICE_NAME: app
+          SERVICE_TAGS: dev
+          XDEBUG_CONFIG: remote_host=172.17.0.1
+          PHP_IDE_CONFIG: serverName=localhost
+        working_dir: /var/www
+        volumes:
+          - /var/www:/var/www
+          - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+        networks:
+          - app-network
+    ```
+
+    Em context estamos definindo qual é o path que irá ficar o nosso dockerfile, para quando
+    o container for inicializado ele deverá rodar um script para instalar dependencias a este container.
+
+    dockerfile definimos o nome do arquivo que irá executar o nosso script.
+
+    Para o funcionamento de debug do php, definimos duas variáveis de ambiente que o docker irá utlizar.
+    Definimos qual é o ip remoto que o xdebug irá acessar em `XDEBUG_CONFIG`, e dizemos qual é o nome do servidor
+    local que a ide irá utilizar em `PHP_IDE_CONFIG`.
+
+3.  Configurando local.ini
+
+    1. Devemos criar o seguinte diretório dentro da nossa pasta, abra o terminal e execute:
+
+      ```bash
+      $ mkdir "php"
+      ```
+
+      Este comando deve criar esse path. 
+    
+    2. Dentro da pasta `php` devemos criar o arquivo `local.ini`
+
+      ```
+      $ touch local.ini
+      ```
+
+    3. Dizemos as configurações do `php`, que o docker irá utilizar
+
+      ```
+      memory_limit = 1512M
+      date.timezone = America/Sao_Paulo
+      max_execution_time = 3600
+      max_input_time = 3600
+
+      upload_max_filesize=40M
+      post_max_size=40M
+
+      error_reporting = E_ALL
+      display_errors = on
+
+      max_allowed_packet=524288000
+      wait_timeout = 3600
+      ```
+      Esse arquivo, é como se fosse as confirações do `php.ini`, quando instalamos
+      o `php` em nossa máquina.
+
+4.  Serviço Nginx
+
+    ```
+    #Nginx Service
+      webserver:
+      image: nginx:alpine
+      container_name: webserver
+      restart: unless-stopped
+      tty: true
+      ports:
+        - "80:80"
+        - "443:443"
+      volumes:
+        - /var/www:/var/www
+        - ./nginx/conf.d/:/etc/nginx/conf.d/
+      networks:
+        - app-network
+      links:
+        - "app"
+    ```
+
+    Definimos que o nosso docker irá utilizar o serviço do nginx.
+
+    Defimos que o nginx irá utilizar a porta `80` e a porta `443`, para serviços 
+    `HTTP` e `HTTPs`. 
+
+    E dizemos que esse serviço está linkado com o serviço app. Nosso serviço de php.
+
+    1. Criar o pah `nginx/conf.d`
+
+      ```bash
+      $ mkdir "nginx/conf.d"
+      ```
+
+    2. Criar o arquivo app.conf
+
+      ```
+      $ touch app.conf
+      ```
+
+    3. Dentro de app.conf colocar as seguinte informações:
+
+      ```
+      server {
+        listen 80;
+        index index.php index.html index.htm;
+        error_log  /var/log/nginx/error.log;
+        access_log /var/log/nginx/access.log;
+        root /var/www/html/bleezPilotLaravel/public;
+        location ~ \.php$ {
+            try_files $uri =404;
+            fastcgi_split_path_info ^(.+\.php)(/.+)$;
+            fastcgi_pass app:9000;
+            fastcgi_index index.php;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            fastcgi_param PATH_INFO $fastcgi_path_info;
+        }
+        location / {
+            try_files $uri $uri/ /index.php?$query_string;
+            gzip_static on;
+        }
+      }
+      ```
+
+      Aqui fica definido quais configurações o nginx irá utilizar. A unica coisa 
+      a se atentar nessa configuração é a variavel chamada root, pois ela é quem diz
+      qual é o diretório raiz que irá escutar.
+
+      Neste exemplo está sendo dito que o diretório raiz é `/var/www/html/bleezPilotLaravel/public`,
+      porém `bleezPilotLaravel` pode ser substituido pelo nome da pasta que está instalado a sua 
+      aplicação laravel.
+
+5.  Serviço Mysql
+
+    ```
+    #MySQL Service
+      db:
+        image: mysql:5.7.22
+        container_name: db
+        restart: unless-stopped
+        tty: true
+        ports:
+          - "3306:3306"
+        environment:
+          MYSQL_DATABASE: laravel
+          MYSQL_ROOT_PASSWORD: root
+          SERVICE_TAGS: dev
+          SERVICE_NAME: mysql
+        volumes:
+          - dbdata:/var/lib/mysql
+          - ./mysql/my.cnf:/etc/mysql/my.cnf
+        networks:
+          - app-network
+    ```
+
+    Definimos o nome do banco que ele irá criar ao executar `MYSQL_DATABASE` e definimos a senha
+    padrão do usuário root de nosso serviço em `MYSQL_ROOT_PASSWORD`.
+
+    1. Criar o pah `mysql`
+
+      ```bash
+      $ mkdir "mysql"
+      ```
+
+    2. Criar o arquivo my.cnf
+
+      ```
+      $ touch my.cnf
+      ```
+
+    3. Dentro de my.cnf colocar as seguinte informações:
+
+      ```
+      [mysqld]
+      general_log = 1
+      general_log_file = /var/lib/mysql/general.log
+      ```
+
+6.  Linkar os seriços e definir o driver local
+
+    ```
+    #Docker Networks
+      networks:
+        app-network:
+          driver: bridge
+      volumes:
+        dbdata:
+          driver: local
+    ```
+
+7. Por fim seu arquivo deverá ter ficado da seguinte maneira:
+
+    ```
+    version: '3'
+    services:
+
+      #PHP Service
+      app:
+        build:
+          context: ./image/php
+          dockerfile: Dockerfile
+        user: 1000:1000
+        image: digitalocean.com/php
+        container_name: app
+        restart: unless-stopped
+        tty: true
+        environment:
+          SERVICE_NAME: app
+          SERVICE_TAGS: dev
+          XDEBUG_CONFIG: remote_host=172.17.0.1
+          PHP_IDE_CONFIG: serverName=localhost
+        working_dir: /var/www
+        volumes:
+          - /var/www:/var/www
+          - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+        networks:
+          - app-network
+
+      #Nginx Service
+      webserver:
+        image: nginx:alpine
+        container_name: webserver
+        restart: unless-stopped
+        tty: true
+        ports:
+          - "80:80"
+          - "443:443"
+        volumes:
+          - /var/www:/var/www
+          - ./nginx/conf.d/:/etc/nginx/conf.d/
+        networks:
+          - app-network
+        links:
+          - "app"
+
+      #MySQL Service
+      db:
+        image: mysql:5.7.22
+        container_name: db
+        restart: unless-stopped
+        tty: true
+        ports:
+          - "3306:3306"
+        environment:
+          MYSQL_DATABASE: laravel
+          MYSQL_ROOT_PASSWORD: root
+          SERVICE_TAGS: dev
+          SERVICE_NAME: mysql
+        volumes:
+          - dbdata:/var/lib/mysql
+          - ./mysql/my.cnf:/etc/mysql/my.cnf
+        networks:
+          - app-network
+
+    #Docker Networks
+    networks:
+      app-network:
+        driver: bridge
+    volumes:
+      dbdata:
+        driver: local
+    ```
+
+### Criar Dockerfile
+
+1. Criar path
+
+    ```bash
+    $ mkdir "image/php"
+    ```
+
+2. Criar arquivo Dockerfile
+
+    ```bash
+    $ touch Dockerfile
+    ```
+
+3. Colocar as seguintes informações
+
+    ```
+    FROM devilbox/php-fpm-7.4:latest
+
+    # Set working directory
+    WORKDIR /var/www
+
+    RUN mkdir -p html/Test;
+
+    RUN apt-get update && apt-get install -y \
+        build-essential \
+        mariadb-client \
+        libpng-dev \
+        libjpeg62-turbo-dev \
+        libfreetype6-dev \
+        locales \
+        zip \
+        jpegoptim optipng pngquant gifsicle \
+        vim \
+        unzip \
+        git \
+        curl \
+        libonig-dev \
+        libzip-dev \
+        libmcrypt-dev
+
+    RUN pecl install redis-5.1.0
+
+    # Clear cache
+    RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+    # Install extensions
+    RUN docker-php-ext-install pdo_mysql mbstring zip exif pcntl
+    RUN docker-php-ext-configure gd --with-gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ --with-png-dir=/usr/include/
+    RUN docker-php-ext-install gd
+    RUN pecl install mcrypt-1.0.3
+
+    # Install composer
+    RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+    # Add user for laravel application
+    RUN groupadd -g 1000 www
+    RUN useradd -u 1000 -ms /bin/bash -g www www
+
+    # Copy existing application directory contents
+    COPY . /var/www
+
+    # Copy existing application directory permissions
+    COPY --chown=www:www . /var/www
+
+    # Change current user to www
+    USER www
+
+    # Expose port 9000 and start php-fpm server
+    EXPOSE 9000
+    EXPOSE 80 443
+    CMD ["php-fpm"]
+    ```
+
+    O docker file irá executar esse script, para instalar seriços dentro do nosso serviço de php.
+
+### Configurando o Laravel
+
+1. Abra o terminal e se desloque até a pasta html
+
+    ```bash
+    $ cd /var/www/html
+    ```
+
+2. Clone o Repositorio
+
+    ```bash
+    $git clone https://github.com/sport129/bleezPilot bleezPilotLaravel
+    ```
+
+3. Dê permissão ao usuário
+
+    ```bash
+    $ sudo chown -R $USER:$USER /var/www/
+    ```
+
+4. Entre na pasta `bleezPilotLaravel` e ajuste o env
+
+    ```bash
+    $ cd bleezPilotLaravel && sudo cp .env.example .env
+    ```
+
+### Iniciando o Docker e Instalando as Dependencias do Laravel
+
+1. Vá até a pasta que instalou o docker
+
+    ```bash
+    $ cd ~/Dockers/dockerLaravel
+    ```
+
+2. Execute o comando para instalar o container
+
+    ```bash
+    $ docker-compose build
+    ```
+
+    A instalação deve demorar alguns minutos, não se assute.
+
+3. Subir os serviços do docker, execute o comando
+
+    ```bash
+    $ docker-compose up -d
+    ```
+
+4. Dê o compose install dentro da pasta do laravel
+
+    ```bash
+    $ docker-compose exec app composer install -d /var/www/html/bleezPilotLaravel
+    ``` 
+5. Gere a chave privada do laravel
+
+    ```bash
+    docker-compose exec app php /var/www/html/bleezPilotLaravel/artisan key:generate
+    ```
+
+Com tudo isso feito, basta digitar `localhost` em seu navegador e seu laravel já está devidamente
+configurado e pronto para uso.

@@ -5,8 +5,8 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "develop": "gatsby develop",
-    "build": "gatsby build"
+    "develop": "gatsby develop --prefix-paths",
+    "build": "gatsby build --prefix-paths"
   },
   "dependencies": {
     "gatsby": "^2.15.9",
