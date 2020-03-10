@@ -3,50 +3,50 @@ title: 'Docker Laravel 7 - Php 7.4 - Mysql 5.7'
 description: 'Sessão destinada a explicar o docker compose do laravel'
 ---
 
-Essa Sessão tem como trabalho, explicar como configurar o docker compose, 
-para instalação de um container confiurado para rodar, um sistema com php 7.4 
-e mysql 5.7 já configurados. O repositório oficial está neste link, [Docker](https://github.com/sport129/dockerFileLaravel).
+Essa seção irá explicar como configurar o Docker Compose para a instalação
+de um container que irá rodar o php 7.4 e mysql 5.7 já configurados.
+O repositório oficial está neste link, [Docker](https://github.com/sport129/dockerFileLaravel).
 
 ### Glossário
 
-    - app: Nome do nosso serviço, ele é um novo que você pode atribuir a gosto,
-    ele será o nome caso precisemos linkar ele a algum outro serviço, é nome que
-    contém as informações daquele serviço.
+  - app: Nome do nosso serviço, ele é um nome que você pode atribuir a gosto,
+  ele será o nome caso precisemos linkar ele a algum outro serviço, é o nome que
+  contém as informações daquele serviço.
 
-    - build: Configuração que, no momento que inicializar o docker, ele irá executar
-    comandos, para instalar serviços adicionoais para aquele serviço, no caso, irá 
-    instalar dependencias somente para o serviço app.
+  - build: Configuração que no momento de inicialização do docker, irá executar
+  comandos para instalar serviços adicionais para aquele serviço, no caso, irá 
+  instalar dependências somente para o serviço app.
 
-    - ports: Defimos quais são as portas que o docker irá sincronizar entre nossa maquina
-    e o docker. A esquerda do dois pontos é a porta que o nosso sistema deve liberar e a direita
-    do ponto e virgula é a porta que o docker irá utilizar.
+  - ports: Definimos quais são as portas que irão sincronizar entre nossa máquina
+  e o docker. A esquerda dos dois pontos é a porta que o nosso sistema deve liberar e a direita
+  do ponto e virgula é a porta que o docker irá utilizar.
 
-    - context: O local que definimos, que irá ficar o nosso arquivo de script
-    
-    - dockerfile: nome do arquivo de script
+  - context: O local que definimos, que irá ficar o nosso arquivo de script.
+  
+  - dockerfile: Nome do arquivo de script.
 
-    - user: para definir qual o usuário que tem permissão nesse docker, para saber
-    o id do usuário do seu sistema basta executar o seguinte comando:
+  - user: Para definir qual o usuário que tem permissão nesse docker. Para saber
+  o id do usuário do seu sistema basta executar o seguinte comando:
 
   ```
   $ echo $UID
   ```
 
-    - image: Define qual imagem iremos utilizar para instalar o php.
+  - image: Define qual imagem iremos utilizar para instalar o php.
 
-    - container_name: define um nome para o nosso container, isso serve para 
-    dividir os nossos diversos container, de diversas outras configurações.
+  - container_name: Define um nome para o nosso container, isso serve para 
+  dividir os nossos diversos containers, de diversas outras configurações.
 
-    - restart: Diz para o docker, que sempre que o sistema iniciar, este docker
-    também dever ser iniciado junto ao sistema.
+  - restart: Diz para o docker que sempre que o sistema iniciar este docker
+  também dever ser iniciado junto ao sistema.
 
-    - environment: Onde definimos variáveis de ambiente para o nosso serviço.
+  - environment: Onde definimos variáveis de ambiente para o nosso serviço.
 
-    - working_dir: Definimos o local de trabalho que o docker irá atuar no seu container, diretorio dentro do container.
+  - working_dir: Definimos o local de trabalho que o docker irá atuar no seu container, diretório dentro do container.
 
-    - volumes: Onde definimos, quais são os diretórios que meu container irá escutar, ou irá ter acesso. A esquerda
-    do ponto e virgula é definido qual o path que o docker irá utilizar, neste é o path do sistema do usuário e a
-    direita do ponto e virgula fica em qual path do docker ele irá linkar.
+  - volumes: Onde definimos quais são os diretórios que o container irá escutar ou irá ter acesso. A esquerda
+  do ponto e vírgula é definido qual o path que o docker irá utilizar no sistema do usuário e a
+  direita do ponto e virgula fica em qual path do docker ele irá linkar.
 
 ### Criando o ambiente docker
 
@@ -76,8 +76,8 @@ e mysql 5.7 já configurados. O repositório oficial está neste link, [Docker](
     $ touch docker-compose.yml
     ```
 
-    Se você já possuir o vscode instalado em sua maquina, basta executar o seguinte
-    comando para abrir o vscode na pasta atual:
+    Se você já possuir o VSCode instalado em sua máquina, basta executar o seguinte
+    comando para abrir o VSCode na pasta atual:
 
     ```bash
     $ code .
@@ -87,15 +87,15 @@ e mysql 5.7 já configurados. O repositório oficial está neste link, [Docker](
 
 1. Configurando a versão e dizendo os serviços
 
-    Com o arquivo aberto devemos escrever a versão e os serviços, basta adicionar
-    no inicio do arquivo a seguinte informação:
+    Com o arquivo aberto devemos escrever a versão e os serviços. Basta adicionar
+    no início do arquivo a seguinte informação:
 
     ```
     version: '3'
     services:
     ```
 
-    Estamos dizendo para o nosso docker que iremos utilizar a versao 3, e que iremos utilizar 
+    Estamos dizendo para o nosso docker que iremos utilizar a versão 3, e que iremos utilizar 
     os seguintes serviços, quando ele for iniciado.
 
 2.  Seviço php
@@ -127,11 +127,11 @@ e mysql 5.7 já configurados. O repositório oficial está neste link, [Docker](
     ```
 
     Em context estamos definindo qual é o path que irá ficar o nosso dockerfile, para quando
-    o container for inicializado ele deverá rodar um script para instalar dependencias a este container.
+    o container for inicializado ele deverá rodar um script para instalar dependências a este container.
 
-    dockerfile definimos o nome do arquivo que irá executar o nosso script.
+    No dockerfile definimos o nome do arquivo que irá executar o nosso script.
 
-    Para o funcionamento de debug do php, definimos duas variáveis de ambiente que o docker irá utlizar.
+    Para o funcionamento de debug do php, definimos duas variáveis de ambiente que o docker irá utilizar.
     Definimos qual é o ip remoto que o xdebug irá acessar em `XDEBUG_CONFIG`, e dizemos qual é o nome do servidor
     local que a ide irá utilizar em `PHP_IDE_CONFIG`.
 
@@ -151,7 +151,7 @@ e mysql 5.7 já configurados. O repositório oficial está neste link, [Docker](
       $ touch local.ini
       ```
 
-    3. Dizemos as configurações do `php`, que o docker irá utilizar
+    3. Dizemos as configurações do `php` que o docker irá utilizar:
 
       ```
       memory_limit = 1512M
@@ -168,7 +168,7 @@ e mysql 5.7 já configurados. O repositório oficial está neste link, [Docker](
       max_allowed_packet=524288000
       wait_timeout = 3600
       ```
-      Esse arquivo, é como se fosse as confirações do `php.ini`, quando instalamos
+      Esse arquivo é como as configurações do `php.ini` quando instalamos
       o `php` em nossa máquina.
 
 4.  Serviço Nginx
@@ -195,7 +195,7 @@ e mysql 5.7 já configurados. O repositório oficial está neste link, [Docker](
     Definimos que o nosso docker irá utilizar o serviço do nginx.
 
     Defimos que o nginx irá utilizar a porta `80` e a porta `443`, para serviços 
-    `HTTP` e `HTTPs`. 
+    `HTTP` e `HTTPS`. 
 
     E dizemos que esse serviço está linkado com o serviço app. Nosso serviço de php.
 
@@ -236,8 +236,8 @@ e mysql 5.7 já configurados. O repositório oficial está neste link, [Docker](
       }
       ```
 
-      Aqui fica definido quais configurações o nginx irá utilizar. A unica coisa 
-      a se atentar nessa configuração é a variavel chamada root, pois ela é quem diz
+      Aqui fica definido quais configurações o nginx irá utilizar. A única coisa 
+      a se atentar nessa configuração é a variável chamada root, pois ela é quem diz
       qual é o diretório raiz que irá escutar.
 
       Neste exemplo está sendo dito que o diretório raiz é `/var/www/html/bleezPilotLaravel/public`,
@@ -290,7 +290,7 @@ e mysql 5.7 já configurados. O repositório oficial está neste link, [Docker](
       general_log_file = /var/lib/mysql/general.log
       ```
 
-6.  Linkar os seriços e definir o driver local
+6.  Linkar os serviços e definir o driver local
 
     ```
     #Docker Networks
@@ -449,7 +449,7 @@ e mysql 5.7 já configurados. O repositório oficial está neste link, [Docker](
     CMD ["php-fpm"]
     ```
 
-    O docker file irá executar esse script, para instalar seriços dentro do nosso serviço de php.
+    O docker file irá executar esse script, para instalar serviços dentro do nosso serviço de php.
 
 ### Configurando o Laravel
 
@@ -459,7 +459,7 @@ e mysql 5.7 já configurados. O repositório oficial está neste link, [Docker](
     $ cd /var/www/html
     ```
 
-2. Clone o Repositorio
+2. Clone o repositório
 
     ```bash
     $git clone https://github.com/sport129/bleezPilot bleezPilotLaravel
@@ -477,9 +477,9 @@ e mysql 5.7 já configurados. O repositório oficial está neste link, [Docker](
     $ cd bleezPilotLaravel && sudo cp .env.example .env
     ```
 
-### Iniciando o Docker e Instalando as Dependencias do Laravel
+### Iniciando o Docker e Instalando as Dependências do Laravel
 
-1. Vá até a pasta que instalou o docker
+1. Vá até a pasta que está o docker
 
     ```bash
     $ cd ~/Dockers/dockerLaravel
@@ -491,9 +491,9 @@ e mysql 5.7 já configurados. O repositório oficial está neste link, [Docker](
     $ docker-compose build
     ```
 
-    A instalação deve demorar alguns minutos, não se assute.
+    A instalação deve demorar alguns minutos, não se assuste.
 
-3. Subir os serviços do docker, execute o comando
+3. Subir os serviços do docker, execute o seguinte comando
 
     ```bash
     $ docker-compose up -d
